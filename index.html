@@ -98,6 +98,8 @@
                     socket.emit('add confession', data);
                     socket.on('add confession', (data) => {
                         this.confessions.push(data)
+                        this.title = ""
+                        this.description = ""
                     });
                 },
                 closeAlert() {

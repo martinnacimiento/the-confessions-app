@@ -20,7 +20,7 @@ app.get('/confessions', (req, res) => {
     res.json(confessions)
 });
 
-io.on('connection', function(socket){
+io.on('connection', (socket) => {
     socket.on('add confession', (confession) => {
         confessions.push(confession);
         io.emit('add confession', confession);
