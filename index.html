@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Confesiones</title>
+</head>
+<body>
+    <div id="app">
+        <div class="container-fluid">
+            <h2 class="text-center mt-4 font-weight-bold">Confesiones</h2>
+            <div v-if="alert" class="alert alert-info" role="alert">
+                <button type="button" class="close" @click="closeAlert" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4>Bienvenido!</h4>
+                <p>
+                    Qué puedes confesar? Cualquier cosa.
+                </p>
+                <p>
+                    Se guardan las confesiones? No, se borran cada cierto tiempo (menos de un día generalmente).
+                </p>
+                <p>
+                    Es anónimo? Completamente.
+                </p>
+            </div>
+            <div v-if="loading">
+                Cargando confesiones...😝
+            </div>
+            <div class="row" v-else-if="confessions.length > 0">
+                <div class="col-sm">
+                    <div class="card m-4" v-for=" (c, index) in confessions" :key="c">
+                        <div class="card-header"> 
+                            <span class="badge badge-pill badge-info">
+                                Confesión #{{index + 1}}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ c.title }}
+                            </h5>
+                            <div class="card-text">
+                                {{ c.description }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else>
+                La confesiones se han borrado. Empiece usted con la suya en esta nueva tanda!😜
+            </div>
+            <h2 class="text-center mt-4 font-weight-bold">Confesarse</h2>
+            <div class="form-group">
+                <label>Título</label>
+                <input v-model="title" class="form-control" aria-describedby="emailHelp">
+              </div>
+              <div class="form-group">
+                <label>Descripción</label>
+                <input v-model="description" type="text" class="form-control">
+              </div>
+              <button @click="createConfession" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        var app = new Vue({
+            el: '#app',
+            data: {
+                title: "",
+                description: "",
+                confessions: [],
+                loading: true,
+                alert: true
+            },
+            created() {
+                this.getConfessions()
+            },
+            methods: {
+                getConfessions() {
+                    fetch(window.location.href + 'confessions')
+                        .then(res => {
+                            return res.json();
+                        })
+                        .then(res => {
+                            this.confessions = res
+                            this.loading = false
+                        });
+                    
+                },
+                createConfession() {
+                    let data = {
+                        title: String(this.title),
+                        description: String(this.description)
+                    }
+                    socket.emit('add confession', data);
+                    socket.on('add confession', (data) => {
+                        this.confessions.push(data)
+                    });
+                },
+                closeAlert() {
+                    this.alert = false
+                }
+            }
+        })
+    </script>
+</body>
+</html>
