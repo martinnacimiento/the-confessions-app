@@ -77,6 +77,11 @@
             },
             created() {
                 this.getConfessions()
+                socket.on('add confession', (data) => {
+                    this.confessions.push(data)
+                    this.title = ""
+                    this.description = ""
+                });
             },
             methods: {
                 getConfessions() {
@@ -96,11 +101,6 @@
                         description: String(this.description)
                     }
                     socket.emit('add confession', data);
-                    socket.on('add confession', (data) => {
-                        this.confessions.push(data)
-                        this.title = ""
-                        this.description = ""
-                    });
                 },
                 closeAlert() {
                     this.alert = false
